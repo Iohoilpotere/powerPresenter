@@ -2,11 +2,8 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Office.Interop.PowerPoint;
 using PowerPresenter.Core.Enums;
 using PowerPresenter.Core.Interfaces;
-using PowerPoint = Microsoft.Office.Interop.PowerPoint;
-using Office = Microsoft.Office.Core;
 
 namespace PowerPresenter.App.Services;
 
@@ -22,42 +19,58 @@ public sealed class PowerPointPresentationLauncher : IPresentationLauncher
 
     private void LaunchInternal(string presentationPath, MonitorPreference preference)
     {
-        PowerPoint.Application? application = null;
-        PowerPoint.Presentation? presentation = null;
+        dynamic? application = null;
+        dynamic? presentation = null;
         try
         {
-            application = new PowerPoint.Application
+            var type = Type.GetTypeFromProgID("PowerPoint.Application");
+            if (type is null)
             {
-                Visible = Office.MsoTriState.msoTrue
-            };
+                throw new InvalidOperationException("PowerPoint non è installato sul sistema.");
+            }
+
+            application = Activator.CreateInstance(type) ?? throw new InvalidOperationException("Impossibile inizializzare PowerPoint.");
+            application.Visible = -1; // msoTrue
 
             presentation = application.Presentations.Open(
                 presentationPath,
-                WithWindow: Office.MsoTriState.msoFalse,
-                ReadOnly: Office.MsoTriState.msoTrue,
-                Untitled: Office.MsoTriState.msoFalse);
+                WithWindow: 0,   // msoFalse
+                ReadOnly: -1,    // msoTrue
+                Untitled: 0);    // msoFalse
 
             var slideShowSettings = presentation.SlideShowSettings;
-            slideShowSettings.LoopUntilStopped = Office.MsoTriState.msoFalse;
-            slideShowSettings.ShowWithAnimation = Office.MsoTriState.msoTrue;
-            slideShowSettings.RangeType = PowerPoint.PpSlideShowRangeType.ppShowAll;
+            slideShowSettings.LoopUntilStopped = 0; // msoFalse
+            slideShowSettings.ShowWithAnimation = -1; // msoTrue
+            slideShowSettings.RangeType = 1; // ppShowAll
 
             slideShowSettings.ShowPresenterView = preference == MonitorPreference.Secondary
-                ? Office.MsoTriState.msoTrue
-                : Office.MsoTriState.msoFalse;
+                ? -1
+                : 0;
             slideShowSettings.Run();
         }
         finally
         {
             if (presentation is not null)
             {
-                Marshal.ReleaseComObject(presentation);
+                ReleaseComObject(presentation);
             }
 
             if (application is not null)
             {
-                Marshal.ReleaseComObject(application);
+                ReleaseComObject(application);
             }
+        }
+    }
+
+    private static void ReleaseComObject(object comObject)
+    {
+        try
+        {
+            Marshal.ReleaseComObject(comObject);
+        }
+        catch
+        {
+            // ignored on shutdown
         }
     }
 }

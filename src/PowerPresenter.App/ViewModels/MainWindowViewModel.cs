@@ -6,14 +6,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using PowerPresenter.App.Commands;
 using PowerPresenter.Core.Configuration;
 using PowerPresenter.Core.Enums;
 using PowerPresenter.Core.Interfaces;
 using PowerPresenter.Core.Models;
+using Media = System.Windows.Media;
+using WinForms = System.Windows.Forms;
 
 namespace PowerPresenter.App.ViewModels;
 
@@ -26,12 +26,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private readonly IUserPreferencesStore _preferencesStore;
     private readonly IMonitorService _monitorService;
     private readonly PreviewGenerationContext _previewContext;
-    private readonly Brush _defaultBackground;
+    private readonly Media.Brush _defaultBackground;
     private CancellationTokenSource? _loadingCancellationTokenSource;
     private string? _currentFolder;
     private bool _isBusy;
     private string _statusMessage = string.Empty;
-    private Brush? _backgroundBrush;
+    private Media.Brush? _backgroundBrush;
 
     public MainWindowViewModel(
         IPresentationDiscoveryService discoveryService,
@@ -49,7 +49,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _preferencesStore = preferencesStore;
         _monitorService = monitorService;
         _previewContext = previewContext;
-        _defaultBackground = new SolidColorBrush(Color.FromRgb(16, 21, 34));
+        _defaultBackground = new Media.SolidColorBrush(Media.Color.FromRgb(16, 21, 34));
         _defaultBackground.Freeze();
 
         Presentations = new ObservableCollection<PresentationItemViewModel>();
@@ -124,7 +124,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
-    public Brush? BackgroundBrush
+    public Media.Brush? BackgroundBrush
     {
         get => _backgroundBrush;
         private set
@@ -160,13 +160,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private void BrowseFolder()
     {
-        using var dialog = new FolderBrowserDialog
+        using var dialog = new WinForms.FolderBrowserDialog
         {
             Description = "Seleziona la cartella contenente le presentazioni",
             UseDescriptionForTitle = true
         };
 
-        if (dialog.ShowDialog() == DialogResult.OK)
+        if (dialog.ShowDialog() == WinForms.DialogResult.OK)
         {
             CurrentFolder = dialog.SelectedPath;
             _ = RefreshAsync();
@@ -339,9 +339,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             image.EndInit();
             image.Freeze();
 
-            var brush = new ImageBrush(image)
+            var brush = new Media.ImageBrush(image)
             {
-                Stretch = Stretch.UniformToFill
+                Stretch = Media.Stretch.UniformToFill
             };
             brush.Freeze();
             BackgroundBrush = brush;

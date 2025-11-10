@@ -1,8 +1,7 @@
 using System.Windows;
-using System.Windows.Controls;
 using PowerPresenter.App.ViewModels;
 
-namespace PowerPresenter.Views;
+namespace PowerPresenter.App.Views;
 
 public partial class MainWindow : Window
 {
@@ -15,7 +14,7 @@ public partial class MainWindow : Window
 
     private void OnMonitorButtonClick(object sender, RoutedEventArgs e)
     {
-        if (sender is Button button && button.ContextMenu is { } menu)
+        if (sender is System.Windows.Controls.Button button && button.ContextMenu is { } menu)
         {
             menu.PlacementTarget = button;
             menu.IsOpen = true;

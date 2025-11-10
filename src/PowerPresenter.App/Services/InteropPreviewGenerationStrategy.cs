@@ -3,11 +3,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Office.Interop.PowerPoint;
 using PowerPresenter.Core.Interfaces;
 using PowerPresenter.Core.Models;
-using PowerPoint = Microsoft.Office.Interop.PowerPoint;
-using Office = Microsoft.Office.Core;
 
 namespace PowerPresenter.App.Services;
 
@@ -44,20 +41,29 @@ public sealed class InteropPreviewGenerationStrategy : IPreviewGenerationStrateg
 
     private static PreviewResult GeneratePreviewInternal(string presentationPath, string cachePath)
     {
-        PowerPoint.Application? application = null;
-        PowerPoint.Presentation? presentation = null;
+        dynamic? application = null;
+        dynamic? presentation = null;
         try
         {
-            application = new PowerPoint.Application
+            var type = Type.GetTypeFromProgID("PowerPoint.Application");
+            if (type is null)
             {
-                Visible = Office.MsoTriState.msoTrue
-            };
+                return PreviewResult.Failure("PowerPoint non è installato.");
+            }
+
+            application = Activator.CreateInstance(type);
+            if (application is null)
+            {
+                return PreviewResult.Failure("Impossibile inizializzare PowerPoint.");
+            }
+
+            application.Visible = -1; // msoTrue
 
             presentation = application.Presentations.Open(
                 presentationPath,
-                WithWindow: Office.MsoTriState.msoFalse,
-                ReadOnly: Office.MsoTriState.msoTrue,
-                Untitled: Office.MsoTriState.msoFalse);
+                WithWindow: 0,   // msoFalse
+                ReadOnly: -1,    // msoTrue
+                Untitled: 0);    // msoFalse
 
             var slide = presentation.Slides[1];
             var tempPath = Path.ChangeExtension(Path.GetTempFileName(), ".png");
@@ -71,14 +77,33 @@ public sealed class InteropPreviewGenerationStrategy : IPreviewGenerationStrateg
         {
             if (presentation is not null)
             {
-                presentation.Close();
-                Marshal.ReleaseComObject(presentation);
+                try
+                {
+                    presentation.Close();
+                }
+                catch
+                {
+                    // ignore cleanup issues
+                }
+                ReleaseComObject(presentation);
             }
 
             if (application is not null)
             {
-                Marshal.ReleaseComObject(application);
+                ReleaseComObject(application);
             }
+        }
+    }
+
+    private static void ReleaseComObject(object comObject)
+    {
+        try
+        {
+            Marshal.ReleaseComObject(comObject);
+        }
+        catch
+        {
+            // ignored
         }
     }
 }

@@ -1,14 +1,15 @@
 using System;
 using System.IO;
 using System.Windows;
-using PowerPresenter.Core.Interfaces;
-using PowerPresenter.Core.Services;
 using PowerPresenter.App.Services;
 using PowerPresenter.App.ViewModels;
+using PowerPresenter.App.Views;
+using PowerPresenter.Core.Interfaces;
+using PowerPresenter.Core.Services;
 
-namespace PowerPresenter;
+namespace PowerPresenter.App;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private IPreviewCacheService? _previewCacheService;
 
@@ -34,7 +35,7 @@ public partial class App : Application
         var preferencesStore = UserPreferencesStore.Instance;
         var launcher = new MonitorAwarePresentationLauncherDecorator(new PowerPointPresentationLauncher(), monitorService);
 
-        var mainWindow = new Views.MainWindow
+        var mainWindow = new MainWindow
         {
             DataContext = new MainWindowViewModel(
                 presentationDiscoveryService,

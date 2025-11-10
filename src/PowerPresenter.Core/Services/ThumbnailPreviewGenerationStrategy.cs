@@ -1,11 +1,14 @@
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
-using DocumentFormat.OpenXml.Drawing;
 using PowerPresenter.Core.Interfaces;
 using PowerPresenter.Core.Models;
+using A = DocumentFormat.OpenXml.Drawing;
 
 namespace PowerPresenter.Core.Services;
 
@@ -31,7 +34,8 @@ public sealed class ThumbnailPreviewGenerationStrategy : IPreviewGenerationStrat
 
             await using var stream = File.OpenRead(presentationPath);
             using var presentation = PresentationDocument.Open(stream, false);
-            if (presentation.PresentationPart?.ThumbnailPart is { } thumbnail)
+            var thumbnail = presentation.PresentationPart?.GetPartsOfType<ThumbnailPart>().FirstOrDefault();
+            if (thumbnail is not null)
             {
                 await using var thumbStream = thumbnail.GetStream(FileMode.Open, FileAccess.Read);
                 Directory.CreateDirectory(Path.GetDirectoryName(cachePath)!);
@@ -68,7 +72,7 @@ public sealed class ThumbnailPreviewGenerationStrategy : IPreviewGenerationStrat
             return null;
         }
 
-        var text = slidePart.Slide.Descendants<Text>().Select(t => t.Text).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
+        var text = slidePart.Slide.Descendants<A.Text>().Select(t => t.Text).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
         return text;
     }
 
