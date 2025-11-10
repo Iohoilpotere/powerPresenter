@@ -22,7 +22,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 {
     private readonly IPresentationDiscoveryService _discoveryService;
     private readonly IPreviewGenerationStrategyFactory _strategyFactory;
-    private readonly IPreviewCacheService _previewCacheService;
     private readonly IPresentationLauncher _launcher;
     private readonly IUserPreferencesStore _preferencesStore;
     private readonly IMonitorService _monitorService;
@@ -37,7 +36,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public MainWindowViewModel(
         IPresentationDiscoveryService discoveryService,
         IPreviewGenerationStrategyFactory strategyFactory,
-        IPreviewCacheService previewCacheService,
         IPresentationLauncher launcher,
         IUserPreferencesStore preferencesStore,
         IMonitorService monitorService,
@@ -45,7 +43,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         _discoveryService = discoveryService;
         _strategyFactory = strategyFactory;
-        _previewCacheService = previewCacheService;
         _launcher = launcher;
         _preferencesStore = preferencesStore;
         _monitorService = monitorService;

@@ -40,7 +40,6 @@ public partial class App : System.Windows.Application
             DataContext = new MainWindowViewModel(
                 presentationDiscoveryService,
                 strategyFactory,
-                _previewCacheService,
                 launcher,
                 preferencesStore,
                 monitorService,

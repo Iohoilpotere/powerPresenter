@@ -1,8 +1,8 @@
 using System;
-using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using DocumentFormat.OpenXml.Packaging;
 using PowerPresenter.Core.Interfaces;
@@ -16,6 +16,7 @@ namespace PowerPresenter.Core.Services;
 /// Attempts to reuse embedded thumbnails from the presentation package.
 /// Falls back to generating a branded placeholder.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public sealed class ThumbnailPreviewGenerationStrategy : IPreviewGenerationStrategy
 {
     public string Name => "EmbeddedThumbnail";
@@ -72,7 +73,7 @@ public sealed class ThumbnailPreviewGenerationStrategy : IPreviewGenerationStrat
             return null;
         }
 
-        var slidePart = presentationPart.GetPartById(relationshipId) as P.SlidePart;
+        var slidePart = presentationPart.GetPartById(relationshipId) as SlidePart;
         if (slidePart is null)
         {
             return null;
@@ -87,24 +88,24 @@ public sealed class ThumbnailPreviewGenerationStrategy : IPreviewGenerationStrat
         Directory.CreateDirectory(Path.GetDirectoryName(cachePath)!);
         const int width = 512;
         const int height = 288;
-        using var bitmap = new Bitmap(width, height);
-        using (var graphics = Graphics.FromImage(bitmap))
+        using var bitmap = new System.Drawing.Bitmap(width, height);
+        using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
         {
-            graphics.Clear(Color.FromArgb(24, 30, 54));
-            using var titleFont = new Font("Segoe UI", 18, FontStyle.Bold, GraphicsUnit.Point);
-            using var subtitleFont = new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
-            using var accentBrush = new SolidBrush(Color.FromArgb(0, 173, 181));
-            using var textBrush = Brushes.White;
+            graphics.Clear(System.Drawing.Color.FromArgb(24, 30, 54));
+            using var titleFont = new System.Drawing.Font("Segoe UI", 18, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            using var subtitleFont = new System.Drawing.Font("Segoe UI", 12, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            using var accentBrush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(0, 173, 181));
+            using var textBrush = System.Drawing.Brushes.White;
 
             graphics.FillRectangle(accentBrush, 0, height - 6, width, 6);
-            graphics.DrawString(fileName, titleFont, textBrush, new RectangleF(16, 16, width - 32, 80));
+            graphics.DrawString(fileName, titleFont, textBrush, new System.Drawing.RectangleF(16, 16, width - 32, 80));
             if (!string.IsNullOrWhiteSpace(slideTitle))
             {
-                graphics.DrawString(slideTitle, subtitleFont, textBrush, new RectangleF(16, 100, width - 32, height - 116));
+                graphics.DrawString(slideTitle, subtitleFont, textBrush, new System.Drawing.RectangleF(16, 100, width - 32, height - 116));
             }
             else
             {
-                graphics.DrawString("Anteprima non disponibile", subtitleFont, textBrush, new RectangleF(16, 100, width - 32, height - 116));
+                graphics.DrawString("Anteprima non disponibile", subtitleFont, textBrush, new System.Drawing.RectangleF(16, 100, width - 32, height - 116));
             }
         }
 
