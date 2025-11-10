@@ -14,6 +14,7 @@ using PowerPresenter.Core.Interfaces;
 using PowerPresenter.Core.Models;
 using Media = System.Windows.Media;
 using WinForms = System.Windows.Forms;
+using WpfApp = System.Windows.Application;
 
 namespace PowerPresenter.App.ViewModels;
 
@@ -57,7 +58,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         RefreshCommand = new AsyncRelayCommand(_ => RefreshAsync(), _ => !string.IsNullOrWhiteSpace(_currentFolder));
         BrowseFolderCommand = new RelayCommand(BrowseFolder);
-        CloseCommand = new RelayCommand(() => Application.Current?.Shutdown());
+        CloseCommand = new RelayCommand(() => WpfApp.Current?.Shutdown());
         LaunchPresentationCommand = new AsyncRelayCommand(LaunchPresentationAsync, parameter => parameter is PresentationItemViewModel);
         SetBackgroundCommand = new RelayCommand(SetBackground);
         ChangeMonitorPreferenceCommand = new AsyncRelayCommand(ChangeMonitorPreferenceAsync);
@@ -198,7 +199,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             var items = await Task.Run(() => _discoveryService.Discover(_currentFolder!).ToList(), token).ConfigureAwait(false);
 
-            await Application.Current!.Dispatcher.InvokeAsync(() =>
+            await WpfApp.Current!.Dispatcher.InvokeAsync(() =>
             {
                 Presentations.Clear();
                 foreach (var item in items)
@@ -237,7 +238,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             var previews = await Task.WhenAll(previewTasks).ConfigureAwait(false);
 
-            await Application.Current.Dispatcher.InvokeAsync(() =>
+            await WpfApp.Current.Dispatcher.InvokeAsync(() =>
             {
                 foreach (var (vm, path) in previews)
                 {
@@ -354,7 +355,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private void OnPropertyChanged(string propertyName)
     {
-        var dispatcher = Application.Current?.Dispatcher;
+        var dispatcher = WpfApp.Current?.Dispatcher;
         if (dispatcher is null || dispatcher.CheckAccess())
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

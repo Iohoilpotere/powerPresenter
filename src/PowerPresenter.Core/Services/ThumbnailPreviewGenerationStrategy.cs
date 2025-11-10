@@ -5,10 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Presentation;
 using PowerPresenter.Core.Interfaces;
 using PowerPresenter.Core.Models;
 using A = DocumentFormat.OpenXml.Drawing;
+using P = DocumentFormat.OpenXml.Presentation;
 
 namespace PowerPresenter.Core.Services;
 
@@ -55,18 +55,24 @@ public sealed class ThumbnailPreviewGenerationStrategy : IPreviewGenerationStrat
 
     private static string? ExtractFirstSlideTitle(PresentationPart? presentationPart)
     {
-        if (presentationPart?.Presentation?.SlideIdList is not SlideIdList slideIdList)
+        if (presentationPart?.Presentation?.SlideIdList is not P.SlideIdList slideIdList)
         {
             return null;
         }
 
-        var firstSlideId = slideIdList.ChildElements.OfType<SlideId>().FirstOrDefault();
+        var firstSlideId = slideIdList.ChildElements.OfType<P.SlideId>().FirstOrDefault();
         if (firstSlideId is null)
         {
             return null;
         }
 
-        var slidePart = presentationPart.GetPartById(firstSlideId.RelationshipId) as SlidePart;
+        var relationshipId = firstSlideId.RelationshipId;
+        if (string.IsNullOrEmpty(relationshipId))
+        {
+            return null;
+        }
+
+        var slidePart = presentationPart.GetPartById(relationshipId) as P.SlidePart;
         if (slidePart is null)
         {
             return null;
