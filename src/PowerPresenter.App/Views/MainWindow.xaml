@@ -1,0 +1,103 @@
+<Window x:Class="PowerPresenter.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="clr-namespace:PowerPresenter.App.Converters"
+        xmlns:core="clr-namespace:PowerPresenter.Core.Enums;assembly=PowerPresenter.Core"
+        mc:Ignorable="d"
+        Title="PowerPresenter"
+        WindowState="Maximized"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="False"
+        Background="{Binding BackgroundBrush, FallbackValue=#101522}">
+    <Window.Resources>
+        <conv:ImagePathToBitmapConverter x:Key="ImagePathToBitmapConverter" />
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CloseCommand}" />
+        <KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
+    </Window.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#181F33" Padding="24" Margin="16" CornerRadius="12">
+            <DockPanel>
+                <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
+                    <TextBlock Text="PowerPresenter" FontSize="28" FontWeight="Bold" />
+                    <TextBlock Text="{Binding CurrentFolder}" FontSize="14" Opacity="0.8" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="12" Opacity="0.7" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="Seleziona cartella" Command="{Binding BrowseFolderCommand}" />
+                    <Button Content="Aggiorna" Command="{Binding RefreshCommand}" />
+                    <Button Content="Chiudi" Command="{Binding CloseCommand}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="32,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Border Background="#12172A" CornerRadius="16" Padding="16">
+                <Grid>
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding Presentations}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel IsItemsHost="True" Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource CardBackgroundBrush}" Margin="8" Padding="12" CornerRadius="12">
+                                        <StackPanel Width="260">
+                                            <Border CornerRadius="8" Background="#0F1323" Height="150">
+                                                <Image Source="{Binding PreviewPath, Converter={StaticResource ImagePathToBitmapConverter}}" Stretch="UniformToFill" />
+                                            </Border>
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="16" Margin="0,12,0,4" TextWrapping="Wrap" />
+                                            <Button Content="Avvia presentazione"
+                                                    Command="{Binding DataContext.LaunchPresentationCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <TextBlock Text="Nessuna presentazione trovata nella cartella selezionata." Foreground="White" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Margin="16" Padding="16" HorizontalAlignment="Right" Background="#181F33" CornerRadius="12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Imposta sfondo" Command="{Binding SetBackgroundCommand}" />
+                <Button x:Name="MonitorButton" Click="OnMonitorButtonClick">
+                    <Button.Content>
+                        <TextBlock Text="{Binding MonitorPreferenceLabel, StringFormat=Monitor: {0}}" />
+                    </Button.Content>
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Automatico" Command="{Binding DataContext.ChangeMonitorPreferenceCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{x:Static core:MonitorPreference.Automatic}" />
+                            <MenuItem Header="Monitor Principale" Command="{Binding DataContext.ChangeMonitorPreferenceCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{x:Static core:MonitorPreference.Primary}" />
+                            <MenuItem Header="Monitor Esteso" Command="{Binding DataContext.ChangeMonitorPreferenceCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{x:Static core:MonitorPreference.Secondary}" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <Grid Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}" Background="#80000000">
+            <TextBlock Text="Caricamento presentazioni..." Foreground="White" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
+</Window>
