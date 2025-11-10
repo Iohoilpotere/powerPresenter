@@ -1,0 +1,15 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\PowerPresenter]
+@="Apri con PowerPresenter"
+"Icon"="\"C:\\Program Files\\PowerPresenter\\PowerPresenter.exe\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\PowerPresenter\command]
+@="\"C:\\Program Files\\PowerPresenter\\PowerPresenter.exe\" \"%1\""
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\PowerPresenter]
+@="Apri con PowerPresenter"
+"Icon"="\"C:\\Program Files\\PowerPresenter\\PowerPresenter.exe\""
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\PowerPresenter\command]
+@="\"C:\\Program Files\\PowerPresenter\\PowerPresenter.exe\" \"%V\""
